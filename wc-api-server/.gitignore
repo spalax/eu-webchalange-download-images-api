@@ -1,0 +1,16 @@
+.DS_Store
+.buildpath
+.settings
+.idea/*
+*~
+fcgi-bin/
+temporary/*
+vendor/*
+data/*
+composer.lock
+public/uploaded/tmp
+node_modules/
+public/cache
+public/vendor
+cache
+public/uploads/*
