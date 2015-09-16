@@ -1,3 +1,4 @@
+config/development.config.php
 .DS_Store
 .buildpath
 .settings

@@ -24,6 +24,12 @@
         "doctrine/doctrine-module": "^0.9.0",
         "doctrine/doctrine-orm-module": "^0.9.1",
         "slm/queue": "^0.4.2",
-        "slm/queue-doctrine": "^0.4.1"
+        "slm/queue-doctrine": "^0.4.1",
+        "aws/aws-sdk-php-zf2": "^2.0",
+        "zfcampus/zf-apigility": "^1.2"
+    },
+    "require-dev": {
+        "zfcampus/zf-apigility-admin": "^1.3",
+        "zfcampus/zf-development-mode": "^2.1"
     }
 }
