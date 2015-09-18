@@ -9,6 +9,9 @@ use SlmQueue\Queue\QueueInterface;
 use ZF\ApiProblem\ApiProblem;
 use Application\V1\Entity\Pages as PagesEntity;
 use ZF\Rest\AbstractResourceListener;
+use Zend\Paginator\Paginator;
+use Doctrine\ORM\Tools\Pagination\Paginator as DoctrinePaginator;
+use DoctrineORMModule\Paginator\Adapter\DoctrinePaginator as DoctrineAdapter;
 
 class PagesResource extends AbstractResourceListener
 {
@@ -117,5 +120,20 @@ class PagesResource extends AbstractResourceListener
         } catch (\Exception $e) {
             return new ApiProblem(500, $e->getMessage());
         }
+    }
+
+    /**
+     * Fetch all or a subset of resources
+     *
+     * @param  array $params
+     * @return ApiProblem|mixed
+     */
+    public function fetchAll($params = array())
+    {
+        $qb = $this->entityManager
+                   ->getRepository('Application\V1\Entity\Pages')
+                   ->createQueryBuilder('p');
+
+        return new Paginator(new DoctrineAdapter(new DoctrinePaginator($qb->getQuery())));
     }
 }

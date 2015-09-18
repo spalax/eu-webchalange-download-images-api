@@ -7,6 +7,9 @@ use Doctrine\ORM\EntityManagerInterface;
 use Rhumsaa\Uuid\Uuid;
 use ZF\ApiProblem\ApiProblem;
 use ZF\Rest\AbstractResourceListener;
+use Zend\Paginator\Paginator;
+use Doctrine\ORM\Tools\Pagination\Paginator as DoctrinePaginator;
+use DoctrineORMModule\Paginator\Adapter\DoctrinePaginator as DoctrineAdapter;
 
 class ImagesResource extends AbstractResourceListener
 {
@@ -50,8 +53,9 @@ class ImagesResource extends AbstractResourceListener
             return new ApiProblem(428, 'Not all images downloaded yet');
         }
 
-        return $this->entityManager
-                    ->getRepository('Application\V1\Entity\Images')
-                    ->findByPage($pageEntity);
+        $qb = $this->entityManager->getRepository('Application\V1\Entity\Images')->createQueryBuilder('i');
+        $qb->where('i.page = :page')->setParameter('page', $pageEntity);
+
+        return new Paginator(new DoctrineAdapter(new DoctrinePaginator($qb->getQuery())));
     }
 }

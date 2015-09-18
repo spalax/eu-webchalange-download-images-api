@@ -124,13 +124,14 @@ return [
                 0 => 'GET',
             ],
             'collection_http_methods' => [
-                0 => 'POST',
+                0 => 'GET',
+                1 => 'POST',
             ],
             'collection_query_whitelist' => [],
-            'page_size' => 25,
-            'page_size_param' => null,
+            'page_size' => 15,
+            'page_size_param' => 'limit',
             'entity_class' => 'Application\\V1\\Entity\\Pages',
-            'collection_class' => '',
+            'collection_class' => null,
             'service_name' => 'pages',
         ],
         'Application\\V1\\Rest\\Images\\Controller' => [
@@ -144,9 +145,9 @@ return [
             ],
             'collection_query_whitelist' => [],
             'page_size' => '15',
-            'page_size_param' => null,
+            'page_size_param' => 'limit',
             'entity_class' => 'Application\\V1\\Entity\\Images',
-            'collection_class' => 'Application\\V1\\Rest\\Images\\ImagesCollection',
+            'collection_class' => null,
             'service_name' => 'images',
         ],
     ],
@@ -181,29 +182,17 @@ return [
     'zf-hal' => [
         'metadata_map' => [
             'Application\\V1\\Entity\\Pages' => [
-                'entity_identifier_name' => 'id',
+                'entity_identifier_name' => 'uuid',
                 'route_name' => 'application.rest.pages',
                 'route_identifier_name' => 'page_id',
                 'hydrator' => 'DoctrineModule\\Stdlib\\Hydrator\\DoctrineObject',
-            ],
-            'Application\\V1\\Rest\\Pages\\PagesCollection' => [
-                'entity_identifier_name' => 'id',
-                'route_name' => 'application.rest.pages',
-                'route_identifier_name' => 'page_id',
-                'is_collection' => true,
             ],
             'Application\\V1\\Entity\\Images' => [
                 'entity_identifier_name' => 'id',
                 'route_name' => 'application.rest.images',
                 'route_identifier_name' => 'image_id',
                 'hydrator' => 'DoctrineModule\\Stdlib\\Hydrator\\DoctrineObject',
-            ],
-            'Application\\V1\\Rest\\Images\\ImagesCollection' => [
-                'entity_identifier_name' => 'id',
-                'route_name' => 'application.rest.images',
-                'route_identifier_name' => 'image_id',
-                'is_collection' => true,
-            ],
+            ]
         ],
     ],
     'controllers' => [
