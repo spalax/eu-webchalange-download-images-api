@@ -13,3 +13,24 @@ serverurl=unix://<%= @run_path %>/<%= @unix_socket_file %>
 username=<%= @unix_username %>
 password=<%= @unix_password %>
 <% end -%>
+
+[program:wc-api-server:parse-page]
+user         = www-data
+command      = /usr/bin/php /var/www/wc-api-server/public/index.php queue doctrine ParsePageQueue --start
+numprocs     = 1
+process_name = wc-api-server-worker-%(process_num)
+<% if @unix_auth -%>
+username=<%= @unix_socket_username %>
+password=<%= @unix_socket_password %>
+<% end -%>
+
+[program:wc-api-server:grab-image]
+user         = www-data
+command      = /usr/bin/php /var/www/wc-api-server/public/index.php queue doctrine GrabImageQueue --start
+numprocs     = 1
+process_name = wc-api-server-worker-%(process_num)
+<% if @unix_auth -%>
+username=<%= @unix_socket_username %>
+password=<%= @unix_socket_password %>
+<% end -%>
+

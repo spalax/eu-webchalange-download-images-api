@@ -86,17 +86,8 @@ firewall:
     install: '1'
     rules: {  }
 cron:
-    install: '1'
-    jobs:
-        cj_oml6ch4cfd3r:
-            name: run-que-job
-            user: root
-            command: 'echo "You are my job"'
-            minute: '1'
-            hour: '*'
-            weekday: '*'
-            month: '*'
-            monthday: '*'
+    install: 0
+    jobs: {  }
 nginx:
     install: '1'
     settings:
