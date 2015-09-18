@@ -1,3 +1,14 @@
-<?=$this->render('layout/front/header');?>
-<?=$this->content; ?>
-<?=$this->render('layout/front/footer');?>
+<?php echo $this->doctype();?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      lang="<?= Locale::getPrimaryLanguage(Locale::getDefault())?>">
+<head>
+    <?php $this->headMeta()->appendHttpEquiv('Content-Type','text/html; charset=UTF-8') ?>
+    <title>Job API</title>
+</head>
+<body>
+    <div>
+        <?=$this->content; ?>
+    </div>
+</body>
+</html>
+

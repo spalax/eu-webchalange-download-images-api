@@ -26,7 +26,11 @@
         "slm/queue": "^0.4.2",
         "slm/queue-doctrine": "^0.4.1",
         "aws/aws-sdk-php-zf2": "^2.0",
-        "zfcampus/zf-apigility": "^1.2"
+        "zfcampus/zf-apigility": "^1.2",
+        "ramsey/uuid": "^2.8",
+        "zendframework/zend-dom": "2.5",
+        "zfcampus/zf-apigility-documentation": "^1.1",
+        "zfcampus/zf-apigility-documentation-swagger": "^1.1"
     },
     "require-dev": {
         "zfcampus/zf-apigility-admin": "^1.3",

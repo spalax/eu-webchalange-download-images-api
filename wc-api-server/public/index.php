@@ -1,6 +1,7 @@
 <?php
 define('REQUEST_MICROTIME', microtime(true));
 define('INDEX_DIR', dirname(__FILE__));
+date_default_timezone_set('Europe/Kiev');
 
 /**
  * This makes our life easier when dealing with paths. Everything is relative

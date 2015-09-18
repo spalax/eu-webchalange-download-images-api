@@ -4,6 +4,8 @@ return [
         'Application',
         'ZF\Apigility',
         'ZF\Apigility\Provider',
+        'ZF\Apigility\Documentation\Swagger',
+        'ZF\Apigility\Documentation',
         'AssetManager',
         'ZF\ApiProblem',
         'ZF\MvcAuth',
@@ -15,6 +17,11 @@ return [
         'ZF\Rpc',
         'ZF\Versioning',
         'ZF\DevelopmentMode',
+        'DoctrineModule',
+        'DoctrineORMModule',
+        'SlmQueue',
+        'SlmQueueDoctrine',
+        'AwsModule',
     ],
     'module_listener_options' => [
         'config_glob_paths'    => [
