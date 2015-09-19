@@ -192,7 +192,12 @@ class puphpet_php (
     class { 'puphpet::php::composer':
       php_package   => $puphpet::php::settings::cli_package,
       composer_home => $php['composer_home'],
-    }
+    } -> composer::exec { 'wc-api-server':
+       cmd     => 'install',
+       cwd     => '/var/www/wc-api-server'
+     } 
+
+    
   }
 
   # Usually this would go within the library that needs in (Mailcatcher)

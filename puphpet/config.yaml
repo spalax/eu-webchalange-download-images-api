@@ -330,15 +330,15 @@ mysql:
     adminer: 0
     users:
         mysqlnu_6ae94x4p01qq:
-            name: wp-api-server
+            name: wc_api_server
             password: spalax
     databases:
         mysqlnd_9zndv48jjmt6:
-            name: wp-api-server
-            sql: /var/www/wp-api-server/schema/common.sql
+            name: wc_api_server
+            sql: /var/www/wc-api-server/schema/common.sql
     grants:
         mysqlng_m8njmp1zo17k:
-            user: wp-api-server
+            user: wc_api_server
             table: '*.*'
             privileges:
                 - ALL
