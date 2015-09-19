@@ -4,9 +4,14 @@ namespace Application\QueueJob;
 use Application\Service\Storage\StorageInterface;
 use Application\V1\Entity\Images;
 use Application\V1\Entity\PageInterface;
+use Application\V1\Entity\Pages;
 use Aws;
+use Doctrine\DBAL\LockMode;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\OptimisticLockException;
 use SlmQueue\Job\AbstractJob;
+use SlmQueueDoctrine\Job\Exception\BuryableException;
+use SlmQueueDoctrine\Job\Exception\ReleasableException;
 use Zend\Dom\Document;
 use Zend\Http\Client as HttpClient;
 
@@ -39,10 +44,74 @@ class GrabImage extends AbstractJob
         $this->storageService = $storageService;
     }
 
+    /**
+     * @param int $pageId
+     *
+     * @return Pages
+     */
+    protected function updatePending($pageId)
+    {
+        $pageEntity = $this->entityManager
+                           ->find( 'Application\V1\Entity\Pages', $pageId,
+                                    LockMode::PESSIMISTIC_WRITE);
+
+        $imagesCnt = $pageEntity->getPendingImagesCnt();
+
+        if ( $imagesCnt > 0 ) {
+            $pageEntity->setPendingImagesCnt( $imagesCnt - 1 );
+            if ( $pageEntity->getPendingImagesCnt() == 0 ) {
+                $pageEntity->setStatus( PageInterface::STATUS_DONE );
+            }
+        }
+
+        $this->entityManager->flush();
+
+        return $pageEntity;
+    }
+
+    /**
+     * @param $imagetype
+     *
+     * @return bool|string
+     */
+    protected function get_extension($imagetype)
+    {
+        if(empty($imagetype)) {
+            return false;
+        }
+        switch($imagetype)
+        {
+            case 'image/bmp': return 'bmp';
+            case 'image/cis-cod': return 'cod';
+            case 'image/gif': return 'gif';
+            case 'image/ief': return 'ief';
+            case 'image/jpeg': return 'jpg';
+            case 'image/pipeg': return 'jfif';
+            case 'image/tiff': return 'tif';
+            case 'image/x-cmu-raster': return 'ras';
+            case 'image/x-cmx': return 'cmx';
+            case 'image/x-icon': return 'ico';
+            case 'image/svg+xml': return 'svg';
+            case 'image/x-portable-anymap': return 'pnm';
+            case 'image/x-portable-bitmap': return 'pbm';
+            case 'image/x-portable-graymap': return 'pgm';
+            case 'image/x-portable-pixmap': return 'ppm';
+            case 'image/x-rgb': return 'rgb';
+            case 'image/x-xbitmap': return 'xbm';
+            case 'image/x-xpixmap': return 'xpm';
+            case 'image/x-xwindowdump': return 'xwd';
+            case 'image/png': return 'png';
+            case 'image/x-jps': return 'jps';
+            case 'image/x-freehand': return 'fh';
+            default: return false;
+        }
+    }
+
     public function execute()
     {
         try {
             $this->entityManager->beginTransaction();
+
             $payload = $this->getContent();
 
             echo "processing >> " . $payload['image_src'] .
@@ -50,13 +119,36 @@ class GrabImage extends AbstractJob
                  " >> for ext >> " . $payload['image_ext'] . "\n";
 
             $this->httpClient->setUri( $payload['image_src'] );
+            $this->httpClient->getRequest()->setMethod('HEAD');
 
+            try {
+                $response = $this->httpClient->send();
+                $ext = $this->get_extension($response->getHeaders()->get('Content-Type')->getFieldValue());
+            } catch (\Zend\Http\Exception\InvalidArgumentException $e) {
+                echo "Exception: while sending HEAD method >> " . $e->getMessage() . "\n";
+                $ext = false;
+            }
+
+            echo "declared ext >> " . $payload['image_ext'] . " >> detected ext >> ". $ext. "\n";
+            if ($ext === false) {
+                echo "Not an image \n";
+                $pageEntity = $this->updatePending($payload['page_id']);
+                $this->entityManager->commit();
+
+                echo "processed >> " . $payload['image_src'] .
+                     " >> pendingCnt >> " . $pageEntity->getPendingImagesCnt() .
+                     " >> status >> " . $pageEntity->getStatus() . "\n";
+                return;
+            }
+
+            $this->httpClient->getRequest()->setMethod('GET');
             $response  = $this->httpClient->send();
-            if ($payload['image_ext'] == 'svg') {
+
+            if ($ext == 'svg') {
                 $xmlget = simplexml_load_string($response->getBody());
                 $xmlattributes = $xmlget->attributes();
-                $width = preg_replace('/[a-z]/', '', strtolower((string) $xmlattributes->width));
-                $height = preg_replace('/[a-z]/', '', strtolower((string) $xmlattributes->height));
+                $width = preg_replace('/[^0-9.]/', '', strtolower((string) $xmlattributes->width));
+                $height = preg_replace('/[^0-9.]/', '', strtolower((string) $xmlattributes->height));
                 $imageInfo = [$width, $height, 'mime'=>$response->getHeaders()->get('Content-Type')->getFieldValue()];
                 $imageSize = mb_strlen($response->getBody(), '8bit');
             } else {
@@ -73,34 +165,31 @@ class GrabImage extends AbstractJob
             $url = $this->storageService
                         ->store( $payload['image_ext'], $response->getBody() );
 
-            /* @var $pageEntity \Application\V1\Entity\Pages */
-            $pageEntity = $this->entityManager->find( 'Application\V1\Entity\Pages', $payload['page_id'] );
-
             $imageEntity = new Images();
+
             $imageEntity->setContentType( $imageInfo['mime'] );
             $imageEntity->setWidth( $imageInfo[0] );
             $imageEntity->setHeight( $imageInfo[1] );
             $imageEntity->setSize( $imageSize );
             $imageEntity->setLocalPath( $url );
             $imageEntity->setRemotePath( $payload['image_src'] );
+
+            $pageEntity = $this->updatePending($payload['page_id']);
+
             $imageEntity->setPage( $pageEntity );
-
-            $imagesCnt = $pageEntity->getPendingImagesCnt();
-
-            if ( $imagesCnt > 0 ) {
-                $pageEntity->setPendingImagesCnt( $imagesCnt - 1 );
-                if ($pageEntity->getPendingImagesCnt() == 0) {
-                    $pageEntity->setStatus(PageInterface::STATUS_DONE);
-                }
-            }
-
             $this->entityManager->persist( $imageEntity );
             $this->entityManager->flush();
             $this->entityManager->commit();
+
+            echo "processed >> " . $payload['image_src'] .
+                 " >> pendingCnt >> " . $pageEntity->getPendingImagesCnt() .
+                 " >> status >> " . $pageEntity->getStatus() . "\n";
+
         } catch (\Exception $e) {
-            \Application\Stdlib\Debug\Utility::dump( $e->getMessage() );
+            echo "Exception : >>>> ". $e->getMessage(). "\n";
             $this->entityManager->rollback();
-            throw $e;
+
+            throw new ReleasableException(array('priority' => 10, 'delay' => 15));
         }
     }
 }

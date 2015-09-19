@@ -65,24 +65,7 @@ return [
    }
    "site_url": "Site url where you want to grab all dom images"
 }',
-            ],
-            'PATCH' => [
-                'description' => 'Partially change queued page',
-                'request' => '{
-   "site_url": "Site url where you want to grab all dom images"
-}',
-                'response' => '{
-   "_links": {
-       "self": {
-           "href": "/pages[/:page_id]"
-       }
-   }
-   "site_url": "Site url where you want to grab all dom images"
-}',
-            ],
-            'PUT' => [
-                'description' => 'Replace',
-            ],
+            ]
         ],
     ],
     'Application\\V1\\Rest\\Images\\Controller' => [

@@ -7,6 +7,7 @@ use SlmQueue\Job\AbstractJob;
 use SlmQueue\Queue\QueueAwareInterface;
 use SlmQueue\Queue\QueueAwareTrait;
 use SlmQueue\Queue\QueueInterface;
+use SlmQueueDoctrine\Job\Exception\ReleasableException;
 use Zend\Dom\Document;
 use Zend\Http\Client as HttpClient;
 
@@ -77,7 +78,7 @@ class ParsePage extends AbstractJob implements QueueAwareInterface
                 $newUrl .= strtolower($_url['host']);
             }
 
-            $newUrl .= $_url['path'];
+            $newUrl .= '/'.ltrim($_url['path'], '/');
             if (!empty($_url['query'])) {
                 $newUrl .= "?" . $_url['query'];
             }
@@ -116,13 +117,11 @@ class ParsePage extends AbstractJob implements QueueAwareInterface
                                                      $parsedPageUrl['host']);
 
                 $ext = strtolower( pathinfo( $src, PATHINFO_EXTENSION ) );
-                if (in_array($ext, array( 'gif', 'bmp', 'jpg', 'jpeg', 'png', 'apng', 'svg', 'ico' ))) {
-                    $job->setContent( [ 'image_src' => $src,
-                                        'image_ext' => $ext,
-                                        'page_id' => $payload['page_id'] ] );
-                    $jobs[]=$job;
-                    $cnt++;
-                }
+                $job->setContent( [ 'image_src' => $src,
+                                    'image_ext' => $ext,
+                                    'page_id' => $payload['page_id'] ] );
+                $jobs[]=$job;
+                $cnt++;
             }
 
             /* @var \Application\V1\Entity\Pages $pageEntity */
@@ -139,11 +138,14 @@ class ParsePage extends AbstractJob implements QueueAwareInterface
 
             $this->entityManager->flush();
 
-            array_map([$this->grabImageQueue, 'push'], $jobs);
+            foreach ($jobs as $job) {
+                $this->grabImageQueue->push($job);
+            }
+            echo "Jobs to push >> " . count($jobs) . " count pending images >>" . $cnt . "\n";
 
         } catch (\Exception $e) {
-            \Application\Stdlib\Debug\Utility::dump( $e->getMessage() );
-            exit(1);
+            echo 'Exception: >> '.$e->getMessage();
+            throw new ReleasableException(array('priority' => 10, 'delay' => 15));
         }
     }
 }

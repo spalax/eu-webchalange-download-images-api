@@ -20,6 +20,8 @@ command      = /usr/bin/php /var/www/wc-api-server/public/index.php queue doctri
 numprocs     = 2
 startretries = 100
 autorestart  = true
+redirect_stderr = true
+stdout_logfile = /var/log/supervisor/pp.out
 process_name = %(program_name)s_%(process_num)02d
 <% if @unix_auth -%>
 username=<%= @unix_socket_username %>
@@ -32,6 +34,8 @@ command      = /usr/bin/php /var/www/wc-api-server/public/index.php queue doctri
 numprocs     = 2
 startretries = 100
 autorestart  = true
+redirect_stderr = true
+stdout_logfile = /var/log/supervisor/gi.out
 process_name = %(program_name)s_%(process_num)02d
 <% if @unix_auth -%>
 username=<%= @unix_socket_username %>
