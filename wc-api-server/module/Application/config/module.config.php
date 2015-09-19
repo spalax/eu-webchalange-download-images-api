@@ -77,7 +77,7 @@ return [
             'options' => [
 //                'fsPath' => '/Users/oleksiimylotskyi/Sites/dev/wc-api/wc-api-server/public/uploads',
                 'fsPath' => '/var/www/wc-api-server/public/uploads',
-                'httpPath' => 'http://wc-api-server.my/uploads'
+                'httpPath' => '/uploads'
             ],
 //            'type' => 'aws',
 //            'options' => [ 'backet' => 'webchalange' ]

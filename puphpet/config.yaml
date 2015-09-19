@@ -101,7 +101,7 @@ nginx:
             server_aliases:
                 - www.wc-api-server.my
             www_root: /var/www/wc-api-server/public
-            listen_port: '80'
+            listen_port: '8090'
             index_files:
                 - index.php
             client_max_body_size: 10m
@@ -144,7 +144,7 @@ nginx:
             server_aliases:
                 - www.wc-api-client.my
             www_root: /var/www/wc-api-client/public
-            listen_port: '80'
+            listen_port: '8091'
             index_files:
                 - index.php
             client_max_body_size: 100m
