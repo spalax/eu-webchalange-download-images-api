@@ -51,7 +51,7 @@ class Pages implements PageInterface
 
     /**
      * @ORM\OneToMany(targetEntity="Application\V1\Entity\Images",
-     *                mappedBy="pages")
+     *                mappedBy="page")
      */
     private $images;
 
