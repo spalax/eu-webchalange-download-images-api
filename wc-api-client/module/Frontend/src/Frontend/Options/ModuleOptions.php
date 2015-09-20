@@ -1,7 +1,6 @@
 <?php
 namespace Frontend\Options;
 
-use Frontend\Options\Exception\DirectoryNotWritableOrNotExistsException;
 use Zend\Stdlib\AbstractOptions;
 
 class ModuleOptions extends AbstractOptions

@@ -3,7 +3,6 @@ namespace Frontend\API\Rest\Resources;
 
 use Frontend\API\Rest\Client as RestClient;
 use Frontend\API\Rest\Resources\Exception\ApiException;
-use Frontend\Exception\DomainException;
 
 abstract class AbstractResource
 {
@@ -67,11 +66,11 @@ abstract class AbstractResource
         $this->assertError($data);
 
         if (!array_key_exists('_embedded', $data)) {
-            throw new DomainException('Invalid response from pages, does not contains _embedded');
+            throw new ApiException('Invalid response from pages, does not contains _embedded');
         }
 
         if (!array_key_exists($this->getResourceName(), $data['_embedded'])) {
-            throw new DomainException('Invalid response from ' . $this->getResourceName() . ', does not contains pages in _embedded');
+            throw new ApiException('Invalid response from ' . $this->getResourceName() . ', does not contains pages in _embedded');
         }
 
         return (object)['data'=>$data['_embedded'][$this->getResourceName()],

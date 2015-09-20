@@ -24,6 +24,12 @@
 
 <div class="container">
     <?php if (count($this->paginator)): ?>
+        <div class="col-md-12">
+        <?php echo $this->paginationControl($this->paginator,
+            'Sliding',
+            'partials/pagination',
+            array('route' => 'frontend/pagination')); ?>
+        </div>
         <!-- Table -->
         <table class="table table-striped">
             <thead>
@@ -78,9 +84,4 @@
     <?php else :?>
         No pages in queue
     <?php endif; ?>
-
-    <?php echo $this->paginationControl($this->paginator,
-                                        'Sliding',
-                                        'partials/pagination',
-                                         array('route' => 'frontend/pagination')); ?>
 </div>

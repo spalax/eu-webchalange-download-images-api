@@ -1,3 +1,23 @@
-<?=$this->render('layout/front/header');?>
+<?php echo $this->doctype();?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      lang="<?= Locale::getPrimaryLanguage(Locale::getDefault())?>">
+<head>
+    <?php $this->headMeta()->appendHttpEquiv('Content-Type','text/html; charset=UTF-8') ?>
+
+    <?php
+    $this->headTitle('WebChalange Api Client');
+
+    echo $this->headMeta();
+    echo $this->headTitle();
+    ?>
+    <link rel="stylesheet" type="text/css" href="/css/frontend/site.css">
+</head>
+<body class="front">
+<div class="container">
+
 <?=$this->content; ?>
-<?=$this->render('layout/front/footer');?>
+
+<script type="text/javascript" src="/js/frontend/site.min.js"></script>
+</div>
+</body>
+</html>

@@ -8,6 +8,10 @@ body {
     background: #F1F3FA;
 }
 
+.vcenter {
+    align-items: center;
+}
+
 table td {
     overflow-wrap: break-word;
 }
