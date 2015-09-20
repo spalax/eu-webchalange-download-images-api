@@ -226,16 +226,6 @@ class Pages implements PageInterface
     }
 
     /**
-     * Get images
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getImages()
-    {
-        return $this->images;
-    }
-
-    /**
      * Set totalImagesCnt
      *
      * @param integer $totalImagesCnt
