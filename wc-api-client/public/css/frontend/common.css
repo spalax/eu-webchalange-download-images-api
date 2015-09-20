@@ -8,6 +8,10 @@ body {
     background: #F1F3FA;
 }
 
+table td {
+    overflow-wrap: break-word;
+}
+
 /* Profile container */
 .profile {
     margin: 20px 0;

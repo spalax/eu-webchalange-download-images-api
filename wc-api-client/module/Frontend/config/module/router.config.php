@@ -2,69 +2,75 @@
 return [
     'routes' => [
         'frontend' => [
-            'type' => 'literal',
+            'type' => 'segment',
             'options' => [
                 'route' => '/',
                 'defaults' => [
-                    'controller' => 'Frontend-Controller-Index'
+                    'controller' => 'Frontend-Controller-Index',
+                    'page' => 1
                 ]
             ],
             'may_terminate' => true,
             'child_routes' => [
-                'login' => [
-                    'type' => 'literal',
+                'pagination' => [
+                    'type' => 'segment',
                     'options' => [
-                        'route' => 'login/success',
+                        'route' => 'page/:page',
+                        'constraints' => [
+                            'page' => '[0-9]+'
+                        ],
                         'defaults' => [
-                            'controller' => 'Frontend-Controller-Login-Success'
+                            'controller' => 'Frontend-Controller-Index',
+                            'page' => 1
                         ]
-                    ]
+                    ],
                 ],
-                'logout' => [
+                'pages' => [
                     'type' => 'literal',
                     'options' => [
-                        'route' => 'logout',
-                        'defaults' => [
-                            'controller' => 'Frontend-Controller-Logout'
-                        ]
-                    ]
-                ],
-                'gallery' => [
-                    'type' => 'literal',
-                    'options' => [
-                        'route' => 'gallery',
+                        'route' => 'pages'
                     ],
                     'may_terminate' => false,
                     'child_routes' => [
-                        'configure' => [
-                            'type' => 'literal',
-                            'options' => [
-                                'route' => '/configure',
-                                'defaults' => [
-                                    'controller' => 'Frontend-Controller-Gallery-Configure'
-                                ]
-                            ]
-                        ],
-                        'preview' => [
-                            'type' => 'method',
-                            'options' => [
-                                'verb' => 'get',
-                                'defaults' => [
-                                    'controller' => 'Frontend-Controller-Gallery-Preview'
-                                ]
-                            ]
-                        ],
-                        'collage' => [
+                        'add' => [
                             'type' => 'method',
                             'options' => [
                                 'verb' => 'post',
                                 'defaults' => [
-                                    'controller' => 'Frontend-Controller-Gallery-Collage'
+                                    'controller' => 'Frontend-Controller-Pages-Add'
+                                ],
+                            ],
+                        ],
+                        'images' => [
+                            'type' => 'segment',
+                            'options' => [
+                                'route' => '/:page_id',
+                                'constraints' => [
+                                    'page_id' => '[a-z0-9A-Z\-]+'
+                                ],
+                                'defaults' => [
+                                    'controller' => 'Frontend-Controller-Pages-Images',
                                 ]
-                            ]
-                        ]
-                    ]
-                ]
+                            ],
+                            'may_terminate' => true,
+                            'child_routes' => [
+                                'pagination' => [
+                                    'type' => 'segment',
+                                    'options' => [
+                                        'route' => '/page/:page',
+                                        'constraints' => [
+                                            'page' => '[0-9]+'
+                                        ],
+                                        'defaults' => [
+                                            'controller' => 'Frontend-Controller-Pages-Images',
+                                            'page' => 1
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
             ]
         ]
     ]

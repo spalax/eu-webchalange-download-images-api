@@ -1,0 +1,50 @@
+<div class="container">
+<?php if (count($this->paginator)): ?>
+    <div class="row">
+    <?php foreach ($this->paginator as $item): ?>
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Remote Path</th>
+                <th>Local Path</th>
+                <th>Dimension</th>
+                <th>Size (bytes)</th>
+                <th>Mime Type</th>
+            </tr>
+            </thead>
+            <?php foreach ($this->paginator as $item): ?>
+                <tr>
+                    <td>
+                        <a href="<?=$item['remotePath']?>" target="_blank"><?=$item['remotePath']?></a>
+                    </td>
+                    <td>
+                        <a href="<?=$item['localPath']?>" target="_blank"><?=$item['localPath']?></a>
+                    </td>
+                    <td>
+                        <?=$item['width']?>w <small>X</small> <?=$item['height']?>h
+                    </td>
+                    <td>
+                        <?=$item['size']?>
+                    </td>
+                    <td>
+                        <?=$item['contentType']?>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+        </table>
+    <?php endforeach; ?>
+    </div>
+<?php else :?>
+    No images for this url were downloaded
+<?php endif; ?>
+
+<?php echo $this->paginationControl($this->paginator,
+                                    'Sliding',
+                                    'frontend/partials/pagination',
+                                    array('route' => 'frontend/pages/images/pagination',
+                                          'params'=>array('page_id'=>$this->id))); ?>
+</div>
+
+<button type="button" class="btn btn-default btn-lg">
+    <a href="<?=$this->url('frontend')?>"><span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span> Pages</a>
+</button>

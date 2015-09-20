@@ -49,6 +49,7 @@ CREATE TABLE `pages` (
   `uuid` varchar(40) NOT NULL,
   `url` text NOT NULL,
   `status` tinyint(3) unsigned NOT NULL,
+  `error_message` varchar(200) DEFAULT NULL,
   `total_images_cnt` smallint(5) unsigned DEFAULT NULL,
   `pending_images_cnt` smallint(5) unsigned DEFAULT NULL,
   PRIMARY KEY (`id`),

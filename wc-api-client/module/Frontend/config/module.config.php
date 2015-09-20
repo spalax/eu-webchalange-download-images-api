@@ -4,9 +4,7 @@ return [
     'view_helpers'=> include __DIR__ . '/module/viewhelpers.config.php',
 
     'frontend' => [
-        'collageSavePath' => __DIR__ . '/../../../public/uploads',
-        'collageHttpPath' => '/uploads',
-        'collageExtension' => 'jpg'
+        'apiUrl' => 'http://192.168.56.101:8090'
     ],
 
     'di' => include __DIR__ . '/module/di.config.php',

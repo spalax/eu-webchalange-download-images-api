@@ -75,10 +75,9 @@ return [
         'imageStorage' => [
             'type' => 'local',
             'options' => [
-//                'fsPath' => '/Users/oleksiimylotskyi/Sites/dev/wc-api/wc-api-server/public/uploads',
                 'fsPath' => '/var/www/wc-api-server/public/uploads',
                 'httpPath' => '/uploads'
-            ],
+            ]
 //            'type' => 'aws',
 //            'options' => [ 'backet' => 'webchalange' ]
         ]
@@ -218,7 +217,7 @@ return [
                     ],
                 ],
                 'name' => 'site_url',
-                'description' => 'Url where you want worker to download all DOM images',
+                'description' => 'Url where you want worker to download all DOM images. Url must be in format scheme://[path, user, password].[tld] on example http://rambler.ru is correct but rambler.ru is incorrect',
                 'error_message' => 'Please insert correct url',
             ],
         ],

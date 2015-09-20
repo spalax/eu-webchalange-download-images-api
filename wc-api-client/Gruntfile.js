@@ -30,8 +30,8 @@ module.exports = function(grunt) {
                     'public/js/frontend/site.min.js':
                         ['public/vendor/jquery/dist/jquery.js',
                             'public/js/frontend/site.js',
-                              'public/vendor/bootstrap/js/button.js',
-                                'public/vendor/mjolnic-bootstrap-colorpicker/dist/js/bootstrap-colorpicker.js']
+                                'public/vendor/bootstrap/js/tooltip.js',
+                                    'public/vendor/bootstrap/js/popover.js']
                 }
             }
         }

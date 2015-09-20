@@ -7,6 +7,8 @@ use SlmQueue\Job\AbstractJob;
 use SlmQueue\Queue\QueueAwareInterface;
 use SlmQueue\Queue\QueueAwareTrait;
 use SlmQueue\Queue\QueueInterface;
+use SlmQueue\Worker\WorkerEvent;
+use SlmQueueDoctrine\Job\Exception\BuryableException;
 use SlmQueueDoctrine\Job\Exception\ReleasableException;
 use Zend\Dom\Document;
 use Zend\Http\Client as HttpClient;
@@ -93,11 +95,16 @@ class ParsePage extends AbstractJob implements QueueAwareInterface
 
     public function execute()
     {
-        try {
-            $payload = $this->getContent();
-            echo "processing >> " . $payload['page_url'] .
-                 " >> for id >> " . $payload['page_id'] . "\n";
+        $payload = $this->getContent();
+        echo "processing >> " . $payload['page_url'] .
+             " >> for id >> " . $payload['page_id'] . "\n";
 
+        /* @var \Application\V1\Entity\Pages $pageEntity */
+        $pageEntity = $this->entityManager
+                           ->find('Application\V1\Entity\Pages',
+                                $payload['page_id']);
+
+        try {
             $this->httpClient->setUri( $payload['page_url'] );
 
             $response = $this->httpClient->send();
@@ -107,7 +114,7 @@ class ParsePage extends AbstractJob implements QueueAwareInterface
                             ->getJobPluginManager();
 
             $jobs = [];
-            $parsedPageUrl = parse_url($payload['page_url']);
+            $parsedPageUrl = parse_url($this->httpClient->getRequest()->getUriString());
             $cnt = 0;
             /* @var \DOMElement $node */
             foreach ( $this->documentQuery->execute( '//body//img', $document ) as $node ) {
@@ -124,13 +131,10 @@ class ParsePage extends AbstractJob implements QueueAwareInterface
                 $cnt++;
             }
 
-            /* @var \Application\V1\Entity\Pages $pageEntity */
-            $pageEntity = $this->entityManager
-                               ->find('Application\V1\Entity\Pages',
-                                   $payload['page_id']);
-
             if ($cnt < 1) {
                 $pageEntity->setStatus(PageInterface::STATUS_DONE);
+            } else {
+                $pageEntity->setStatus(PageInterface::STATUS_RUNNING);
             }
 
             $pageEntity->setPendingImagesCnt($cnt);
@@ -145,7 +149,17 @@ class ParsePage extends AbstractJob implements QueueAwareInterface
 
         } catch (\Exception $e) {
             echo 'Exception: >> '.$e->getMessage();
-            throw new ReleasableException(array('priority' => 10, 'delay' => 15));
+            $pageEntity->setErrorMessage($e->getMessage());
+
+            if ($pageEntity->getStatusNumeric() == PageInterface::STATUS_RECOVERING) {
+                $pageEntity->setStatus(PageInterface::STATUS_ERROR);
+                $this->entityManager->flush();
+                return WorkerEvent::JOB_STATUS_FAILURE;
+            } else {
+                $pageEntity->setStatus(PageInterface::STATUS_RECOVERING);
+                $this->entityManager->flush();
+                throw new ReleasableException(array('priority' => 10, 'delay' => 15));
+            }
         }
     }
 }

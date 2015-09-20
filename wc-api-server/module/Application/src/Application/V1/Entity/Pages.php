@@ -43,6 +43,13 @@ class Pages implements PageInterface
     private $status;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="error_message", type="string", length=200, nullable=true)
+     */
+    private $errorMessage;
+
+    /**
      * @ORM\OneToMany(targetEntity="Application\V1\Entity\Images",
      *                mappedBy="pages")
      */
@@ -138,12 +145,54 @@ class Pages implements PageInterface
     /**
      * Get status
      *
-     * @return int
+     * @return string
      */
-    public function getStatus()
+    public function getStatusNumeric()
     {
         return $this->status;
     }
+
+    /**
+     * Get status text
+     *
+     * @return string
+     */
+    public function getStatus()
+    {
+        switch ($this->status) {
+            case PageInterface::STATUS_RECOVERING :
+                return 'recovering';
+            case PageInterface::STATUS_DONE :
+                return 'done';
+            case PageInterface::STATUS_PENDING :
+                return 'pending';
+            case PageInterface::STATUS_ERROR :
+                return 'error';
+            case PageInterface::STATUS_RUNNING :
+                return 'running';
+            default :
+                return 'unknown';
+        }
+    }
+
+    /**
+     * @return string
+     */
+    public function getErrorMessage()
+    {
+        return $this->errorMessage;
+    }
+
+    /**
+     * @param string $errorMessage
+     */
+    public function setErrorMessage($errorMessage)
+    {
+        $this->errorMessage = $errorMessage;
+
+        return $this;
+    }
+
     /**
      * Constructor
      */

@@ -1,32 +1,25 @@
 <?php
 namespace Frontend\Controller;
 
-use Frontend\Service\Instagram\AuthorizationService;
-use Frontend\Wrapper\API\InstagramWrapperInterface;
+use Frontend\API\Rest\Resources\PagesResource;
 use Zend\Mvc\MvcEvent;
 use Zend\View\Model\ViewModel;
+use Zend\Paginator\Paginator as ZendPaginator;
+use Zend\Paginator\Adapter\Callback as CallbackAdapter;
 
 class IndexController extends AbstractController
 {
     /**
-     * @var InstagramWrapperInterface
+     * @var PagesResource
      */
-    protected $instagramWrapper = null;
+    protected $pagesResource;
 
     /**
-     * @var AuthorizationService|null
+     * @param PagesResource $pagesResource
      */
-    protected $authorizationService = null;
-
-    /**
-     * @param InstagramWrapperInterface $instagramWrapper
-     * @param AuthorizationService $authorizationService
-     */
-    public function __construct(InstagramWrapperInterface $instagramWrapper,
-                                AuthorizationService $authorizationService)
+    public function __construct(PagesResource $pagesResource)
     {
-        $this->instagramWrapper = $instagramWrapper;
-        parent::__construct($authorizationService);
+        $this->pagesResource = $pagesResource;
     }
 
     /**
@@ -37,8 +30,19 @@ class IndexController extends AbstractController
     {
         $viewModel = new ViewModel();
 
-        $viewModel->setVariable( 'loginUri', $this->instagramWrapper->getLoginUrl() );
+        $data = $this->pagesResource->getCollection($this->params('page'), 10);
+
+        $paginator = new ZendPaginator(new CallbackAdapter(function () use ($data){
+            return $data->data;
+        }, function () use ($data) {return $data->total_items;}));
+
+        $paginator->setCurrentPageNumber($data->page)
+                  ->setItemCountPerPage($data->page_size);
+
+        $viewModel->setVariable('data', $data->data);
+        $viewModel->setVariable('paginator', $paginator);
         $viewModel->setTemplate( 'frontend/index' );
+
 
         $e->setResult($viewModel);
     }

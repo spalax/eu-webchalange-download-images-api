@@ -32,7 +32,7 @@ return [
                        "href": "/pages[/:page_id]"
                    }
                }
-              "site_url": "Site url where you want to grab all dom images"
+              "site_url": "Url where you want worker to download all DOM images. Url must be in format scheme://[path, user, password].[tld] on example http://rambler.ru is correct but rambler.ru is incorrect"
            }
        ]
    }
@@ -41,7 +41,7 @@ return [
             'POST' => [
                 'description' => 'Add new page to the queue',
                 'request' => '{
-   "site_url": "Url where you want worker to download all DOM images"
+   "site_url": "Url where you want worker to download all DOM images. Url must be in format scheme://[path, user, password].[tld] on example http://rambler.ru is correct but rambler.ru is incorrect"
 }',
                 'response' => '{
    "_links": {
@@ -49,7 +49,7 @@ return [
            "href": "/pages[/:page_id]"
        }
    }
-   "site_url": "Url where you want worker to download all DOM images"
+   "site_url": "Url where you want worker to download all DOM images. Url must be in format scheme://[path, user, password].[tld] on example http://rambler.ru is correct but rambler.ru is incorrect"
 }',
             ],
         ],
@@ -63,7 +63,7 @@ return [
            "href": "/pages[/:page_id]"
        }
    }
-   "site_url": "Site url where you want to grab all dom images"
+   "site_url": "Url where you want worker to download all DOM images. Url must be in format scheme://[path, user, password].[tld] on example http://rambler.ru is correct but rambler.ru is incorrect"
 }',
             ]
         ],

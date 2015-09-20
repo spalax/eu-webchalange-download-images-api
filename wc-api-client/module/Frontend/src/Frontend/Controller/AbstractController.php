@@ -9,33 +9,6 @@ use Zend\Mvc\Controller\AbstractController as ZendAbstractController;
 
 abstract class AbstractController extends ZendAbstractController
 {
-    /**
-     * @var AuthorizationService
-     */
-    protected $authorizationService = null;
-
-    /**
-     * @param AuthorizationService $authorizationService
-     */
-    public function __construct(AuthorizationService $authorizationService)
-    {
-        $this->authorizationService = $authorizationService;
-    }
-
-    /* (non-PHPdoc)
-     * @see \Zend\Mvc\Controller\AbstractController::dispatch()
-     */
-    public function dispatch(Request $request, Response $response = null)
-    {
-        if (!is_null($this->serviceLocator
-                          ->get('di')
-                          ->get('Frontend\Service\Instagram\AuthenticationService')
-                          ->getAuthData())) {
-            return $this->redirect()->toRoute( 'frontend/gallery/configure' );
-        }
-        return parent::dispatch($request, $response);
-    }
-
     /* (non-PHPdoc)
     * @see \Zend\Mvc\Controller\AbstractController::attachDefaultListeners()
     */

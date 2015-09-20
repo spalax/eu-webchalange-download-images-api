@@ -6,11 +6,10 @@ use Application\V1\Entity\Images;
 use Application\V1\Entity\PageInterface;
 use Application\V1\Entity\Pages;
 use Aws;
+use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\LockMode;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\OptimisticLockException;
 use SlmQueue\Job\AbstractJob;
-use SlmQueueDoctrine\Job\Exception\BuryableException;
 use SlmQueueDoctrine\Job\Exception\ReleasableException;
 use Zend\Dom\Document;
 use Zend\Http\Client as HttpClient;
@@ -60,11 +59,9 @@ class GrabImage extends AbstractJob
         if ( $imagesCnt > 0 ) {
             $pageEntity->setPendingImagesCnt( $imagesCnt - 1 );
             if ( $pageEntity->getPendingImagesCnt() == 0 ) {
-                $pageEntity->setStatus( PageInterface::STATUS_DONE );
+                $pageEntity->setStatus(PageInterface::STATUS_DONE);
             }
         }
-
-        $this->entityManager->flush();
 
         return $pageEntity;
     }
@@ -109,35 +106,42 @@ class GrabImage extends AbstractJob
 
     public function execute()
     {
-        try {
-            $this->entityManager->beginTransaction();
+        $this->entityManager
+             ->getConnection()
+             ->setTransactionIsolation(Connection::TRANSACTION_SERIALIZABLE);
 
+        $this->entityManager->beginTransaction();
+
+        try {
             $payload = $this->getContent();
+            $ext = false;
 
             echo "processing >> " . $payload['image_src'] .
                  " >> for id >> " . $payload['page_id'] .
                  " >> for ext >> " . $payload['image_ext'] . "\n";
 
-            $this->httpClient->setUri( $payload['image_src'] );
-            $this->httpClient->getRequest()->setMethod('HEAD');
-
             try {
+                $this->httpClient->setUri( $payload['image_src'] );
+                $this->httpClient->getRequest()->setMethod('HEAD');
                 $response = $this->httpClient->send();
-                $ext = $this->get_extension($response->getHeaders()->get('Content-Type')->getFieldValue());
+                if ($response->getHeaders()->get('Content-Type') !== false) {
+                    $ext = $this->get_extension($response->getHeaders()->get('Content-Type')->getFieldValue());
+                }
             } catch (\Zend\Http\Exception\InvalidArgumentException $e) {
                 echo "Exception: while sending HEAD method >> " . $e->getMessage() . "\n";
-                $ext = false;
             }
 
             echo "declared ext >> " . $payload['image_ext'] . " >> detected ext >> ". $ext. "\n";
             if ($ext === false) {
                 echo "Not an image \n";
                 $pageEntity = $this->updatePending($payload['page_id']);
-                $this->entityManager->commit();
 
                 echo "processed >> " . $payload['image_src'] .
                      " >> pendingCnt >> " . $pageEntity->getPendingImagesCnt() .
                      " >> status >> " . $pageEntity->getStatus() . "\n";
+
+                $this->entityManager->flush();
+                $this->entityManager->commit();
                 return;
             }
 
@@ -156,7 +160,7 @@ class GrabImage extends AbstractJob
                 $contentLength = $response->getHeaders()
                                           ->get( 'Content-Length' );
                 if ($contentLength === false) {
-                    $imageSize = mb_strlen($response->getBody(), $imageInfo['bits'].'bit');
+                    $imageSize = mb_strlen($response->getBody(), '8bit');
                 } else {
                     $imageSize = $contentLength->getFieldValue();
                 }
@@ -178,17 +182,17 @@ class GrabImage extends AbstractJob
 
             $imageEntity->setPage( $pageEntity );
             $this->entityManager->persist( $imageEntity );
-            $this->entityManager->flush();
-            $this->entityManager->commit();
 
             echo "processed >> " . $payload['image_src'] .
                  " >> pendingCnt >> " . $pageEntity->getPendingImagesCnt() .
                  " >> status >> " . $pageEntity->getStatus() . "\n";
 
-        } catch (\Exception $e) {
-            echo "Exception : >>>> ". $e->getMessage(). "\n";
-            $this->entityManager->rollback();
+            $this->entityManager->flush();
+            $this->entityManager->commit();
 
+        } catch (\Exception $e) {
+            $this->entityManager->rollback();
+            echo "Exception : >>>> ". $e->getMessage(). "\n";
             throw new ReleasableException(array('priority' => 10, 'delay' => 15));
         }
     }

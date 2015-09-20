@@ -1,7 +1,86 @@
-<div class="jumbotron">
-    <h1>Welcome to Instagram Collage!</h1>
-    <p>Here you can create collages, using your photos, or using most recent.</p>
-    <p class="text-center"><a class="btn btn-primary btn-lg btn-block"
-          href="<?=$this->loginUri?>" data-dojo-attach-point="buttonNode"
-          role="button">Sign in via Instagram</a></p>
+<script type="text/javascript">
+    function refresh () {
+        $.ajax(location.url).success(function (data){
+            $('.table.table-striped').html($(data).find('.table.table-striped').html());
+        });
+    }
+
+    setInterval(refresh, 1000);
+</script>
+<?=$this->flashMessenger()->render('error', array('alert', 'alert-danger'))?>
+<?=$this->flashMessenger()->render('success', array('alert', 'alert-success'))?>
+<div class="container">
+    <form method="post" action="<?=$this->url('frontend/pages/add')?>" class="row">
+        <div class="col-lg-6 form-group">
+            <div class="input-group">
+                <input type="text" class="form-control" name="site_url" placeholder="Page Url">
+                <span class="input-group-btn">
+                    <button class="btn btn-primary" type="submit">Add Page</button>
+                </span>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="container">
+    <?php if (count($this->paginator)): ?>
+        <!-- Table -->
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>Site Url</th>
+                <th>Status</th>
+            </tr>
+            </thead>
+        <?php foreach ($this->paginator as $item): ?>
+            <?php
+                if ($item['pendingImagesCnt'] > 0 && $item['totalImagesCnt'] > 0) {
+                    $onePercent       = ( $item['totalImagesCnt'] / 100 );
+                    $downloadedImages = ( (int) $item['totalImagesCnt'] - (int) $item['pendingImagesCnt'] );
+                    $percentage       = ( $downloadedImages / $onePercent );
+                }
+            ?>
+            <tr>
+                <th scope="row">
+                    <?=$item['uuid']?>
+                </th>
+                <td><?=$item['url']?></td>
+                <td>
+                    <?php if ($item['status'] == 'done') : ?>
+                        <a href="<?=$this->url('frontend/pages/images', array('page_id'=>$item['uuid']))?>"
+                           class="btn btn-xs btn-success" role="button">Images</a>
+                    <?php elseif ($item['status'] == 'error') : ?>
+                        <button type="button"
+                                class="btn btn-xs btn-danger" data-toggle="popover"
+                                title="Error" data-content="<?=$item['errorMessage']?>">
+                            Details</button>
+                    <?php elseif ($item['status'] == 'running') : ?>
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-striped active"
+                                 role="progressbar"
+                                 aria-valuenow="<?=$percentage?>"
+                                 aria-valuemin="0"
+                                 aria-valuemax="100"
+                                 style="width: <?=$percentage?>%">
+                                <span class="sr-only">
+                                    <?=$downloadedImages?>
+                                    Downloaded from <?=((int)$item['totalImagesCnt'])?></span>
+                            </div>
+                        </div>
+                    <?php else : ?>
+                        <span class="label label-info"><?=$item['status']?></span>
+                    <?php endif ?>
+                </td>
+            </tr>
+        <?php endforeach; ?>
+        </table>
+    <?php else :?>
+        No pages in queue
+    <?php endif; ?>
+
+    <?php echo $this->paginationControl($this->paginator,
+                                        'Sliding',
+                                        'partials/pagination',
+                                         array('route' => 'frontend/pagination')); ?>
 </div>

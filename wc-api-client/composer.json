@@ -23,6 +23,10 @@
         "zendframework/zend-http": "2.5.0",
         "zendframework/zend-stdlib": "2.5.0",
         "zendframework/zend-session": "2.5.0",
-        "imagine/imagine": "^0.6.2"
+        "imagine/imagine": "^0.6.2",
+        "jmeyering/hal-explorer": "^1.1",
+        "guzzlehttp/guzzle": "^6.1",
+        "nategood/httpful": "^0.2.19",
+        "zendframework/zend-paginator": "2.5"
     }
 }

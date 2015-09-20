@@ -49,7 +49,7 @@ class ImagesResource extends AbstractResourceListener
             return new ApiProblem(404, 'Not found result of missed page');
         }
 
-        if ($pageEntity->getStatus() !== PageInterface::STATUS_DONE) {
+        if ($pageEntity->getStatusNumeric() !== PageInterface::STATUS_DONE) {
             return new ApiProblem(428, 'Not all images downloaded yet');
         }
 

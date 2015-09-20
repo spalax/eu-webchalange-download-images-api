@@ -65,31 +65,10 @@ class PagesResource extends AbstractResourceListener
                                         'page_id'=>$pageEntity->getId()));
 
             $this->queue->push($queueJob);
-
-            return array('id'=>$pageEntity->getUuid(),
-                         'status'=>$this->getPageStatus($pageEntity));
+            return $pageEntity;
 
         } catch (\Exception $e) {
             return new ApiProblem(500, $e->getMessage());
-        }
-    }
-
-    /**
-     * @param PagesEntity $pagesEntity
-     *
-     * @return string
-     */
-    protected function getPageStatus(PagesEntity $pagesEntity)
-    {
-        switch ($pagesEntity->getStatus()) {
-            case PageInterface::STATUS_PENDING:
-                return 'pending';
-            case PageInterface::STATUS_RUNNING:
-                return 'running';
-            case PageInterface::STATUS_BURIED:
-                return 'buried';
-            default:
-                return 'done';
         }
     }
 
@@ -115,8 +94,7 @@ class PagesResource extends AbstractResourceListener
                 return new ApiProblem(404, 'Requested site not found');
             }
 
-            return array('id'=>$id,
-                         'status'=>$this->getPageStatus($pagesEntity));
+            return $pagesEntity;
         } catch (\Exception $e) {
             return new ApiProblem(500, $e->getMessage());
         }
@@ -132,7 +110,8 @@ class PagesResource extends AbstractResourceListener
     {
         $qb = $this->entityManager
                    ->getRepository('Application\V1\Entity\Pages')
-                   ->createQueryBuilder('p');
+                   ->createQueryBuilder('p')
+                   ->orderBy('p.id', 'DESC');
 
         return new Paginator(new DoctrineAdapter(new DoctrinePaginator($qb->getQuery())));
     }

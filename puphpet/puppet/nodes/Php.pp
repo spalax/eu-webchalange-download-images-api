@@ -194,10 +194,13 @@ class puphpet_php (
       composer_home => $php['composer_home'],
     } -> composer::exec { 'wc-api-server':
        cmd     => 'install',
+       timeout => 100800,
        cwd     => '/var/www/wc-api-server'
-     } 
-
-    
+    } -> composer::exec { 'wc-api-client':
+       cmd     => 'install',
+       timeout => 100800,
+       cwd     => '/var/www/wc-api-client'
+    }  
   }
 
   # Usually this would go within the library that needs in (Mailcatcher)
