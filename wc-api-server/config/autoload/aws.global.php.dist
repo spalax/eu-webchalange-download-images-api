@@ -1,0 +1,11 @@
+<?php
+return [
+    'aws' => [
+        'credentials' => [
+            'key'    => '',
+            'secret' => '',
+        ],
+        'region' => 'eu-west-1',
+        'version' => '2006-03-01'
+    ]
+];
